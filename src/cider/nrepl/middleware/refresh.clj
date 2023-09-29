@@ -5,6 +5,7 @@
   ;; when developing cider-nrepl itself, or when cider-nrepl is used as a
   ;; checkout dependency - tools.namespace doesn't reload source in JARs.
   (:require
+   [cider.nrepl.middleware.util.haystack :refer [cached-analyze]]
    [clojure.main :refer [repl-caught]]
    [clojure.tools.namespace.dir :as dir]
    [clojure.tools.namespace.find :as find]
@@ -95,7 +96,7 @@
   (transport/send
    transport
    (response-for msg (cond-> {:status :error}
-                       error (assoc :error (stacktrace.analyzer/analyze error print-fn))
+                       error (assoc :error (cached-analyze error print-fn))
                        error-ns (assoc :error-ns error-ns))))
 
   (binding [*msg* msg

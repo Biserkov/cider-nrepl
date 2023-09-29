@@ -4,6 +4,7 @@
    :added "0.32.0"}
   (:require [cider.nrepl.middleware.inspect :as middleware.inspect]
             [cider.nrepl.middleware.util.error-handling :refer [with-safe-transport]]
+            [cider.nrepl.middleware.util.haystack :refer [cached-analyze]]
             [haystack.analyzer :as analyzer]
             [haystack.parser.clojure.throwable :as throwable]
             [logjam.event :as event]
@@ -180,7 +181,7 @@
   [{:keys [transport ::print/print-fn] :as msg}]
   (let [event (event msg)]
     (if-let [exception (:exception event)]
-      (do (doseq [cause (analyzer/analyze exception print-fn)]
+      (do (doseq [cause (cached-analyze exception print-fn)]
             (transport/send transport (response-for msg cause)))
           (transport/send transport (response-for msg :status :done)))
       (transport/send transport (response-for msg :status :no-error)))))

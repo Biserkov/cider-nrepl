@@ -5,6 +5,7 @@
    [cider.nrepl.middleware.test.extensions :as extensions]
    [cider.nrepl.middleware.util :as util]
    [cider.nrepl.middleware.util.coerce :as util.coerce]
+   [cider.nrepl.middleware.util.haystack :refer [cached-analyze]]
    [clojure.pprint :as pp]
    [clojure.string :as str]
    [clojure.test :as test]
@@ -493,7 +494,7 @@
             (with-bindings (assoc @session #'ie/*msg* msg)
               (let [[ns var] (map misc/as-sym [ns var])]
                 (if-let [e (get-in @results [ns var index :error])]
-                  (doseq [cause (stacktrace.analyzer/analyze e print-fn)]
+                  (doseq [cause (cached-analyze e print-fn)]
                     (t/send transport (response-for msg cause)))
                   (t/send transport (response-for msg :status :no-error))))))
           (fn []

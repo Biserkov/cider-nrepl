@@ -2,6 +2,7 @@
   "Cause and stacktrace analysis for exceptions"
   {:author "Jeff Valk"}
   (:require
+   [cider.nrepl.middleware.util.haystack :refer [cached-analyze]]
    [cider.nrepl.middleware.util.nrepl :refer [notify-client]]
    [clojure.string :as str]
    [haystack.analyzer :as analyzer]
@@ -31,7 +32,7 @@
 (defn- analyze-last-stacktrace
   "Analyze the last exception."
   [{:keys [session ::print/print-fn] :as msg}]
-  (send-analysis msg (analyzer/analyze (@session #'*e) print-fn)))
+  (send-analysis msg (cached-analyze (@session #'*e) print-fn)))
 
 (defn- handle-analyze-last-stacktrace-op
   "Handle the analyze last stacktrace op."
@@ -46,7 +47,7 @@
 (defn- analyze-stacktrace
   "Parse and analyze the `stacktrace`."
   [{:keys [stacktrace] :as msg}]
-  (if-let [analysis (some-> stacktrace parser/parse analyzer/analyze)]
+  (if-let [analysis (some-> stacktrace parser/parse (cached-analyze analyzer/pprint))]
     (send-analysis msg analysis)
     (no-error msg)))
 
